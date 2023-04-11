@@ -18,7 +18,7 @@ Comentar o código
 
 
 Referencias:
-https://www.youtube.com/watch?v=bpWDDgaPkQI&t
-https://www.youtube.com/watch?v=vnYw1Uq9NAc&t
-https://www.youtube.com/watch?v=Z991ILgqaK8
-https://registry.khronos.org/OpenGL/extensions/ARB/
+https://www.youtube.com/watch?v=bpWDDgaPkQI&t\
+https://www.youtube.com/watch?v=vnYw1Uq9NAc&t\
+https://www.youtube.com/watch?v=Z991ILgqaK8\
+https://registry.khronos.org/OpenGL/extensions/ARB/\
