@@ -1,5 +1,7 @@
 #include<stdio.h>
 #include<stdint.h>
+#include<stdlib.h>
+#include<poll.h>
 
 #define GLX_GLXEXT_PROTOTYPES
 #include<GL/glx.h>
@@ -12,7 +14,7 @@
 #include<X11/Xlib-xcb.h>
 
 
-xcb_screen_t * xcb_get_scrn (xcb_connection_t* connection, int scrn_idx){
+xcb_screen_t* xcb_get_scrn (xcb_connection_t* connection, int scrn_idx){
 
   xcb_screen_iterator_t iter = xcb_setup_roots_iterator(xcb_get_setup(connection));
 
@@ -20,7 +22,39 @@ xcb_screen_t * xcb_get_scrn (xcb_connection_t* connection, int scrn_idx){
     if (scrn_idx == 0) return iter.data;
   }
   return NULL;
+} // return Xlib Screen struct, pass by all screens until find the chosen screen.
+
+xcb_generic_event_t* xcb_ev_poll(xcb_connection_t * connection, int timeout_ms){
+  struct pollfd pfd = {0x00};
+  pfd.events = POLLIN;
+  pfd.fd = xcb_get_file_descriptor(connection);
+  int ntriggers = poll(&pfd, 1, timeout_ms);
+  return xcb_poll_for_event(connection);
 }
+
+void infos(){
+  GLint Ver[3];
+  printf("==========INFOS==========\n");
+  glGetIntegerv(GL_MAJOR_VERSION, &Ver[0]);
+  glGetIntegerv(GL_MINOR_VERSION, &Ver[1]);
+  printf("Version: %d.%d\n", Ver[0], Ver[1]);
+}//print the Opengl version
+
+void change_color_win(){
+  static int flag = 1;
+  static float NC = 0;
+  glClearColor(NC, NC, NC, 1);
+  if(flag){
+    NC += 1.0/5000.0;
+    if(NC>=1.0) flag = 0;
+  }
+  else{
+    NC -= 1.0/5000.0;
+    if(NC<=0.0) flag= 1;
+  }
+  glClear(GL_COLOR_BUFFER_BIT);
+  glFlush();
+}//change the screen color between white and balck
 
 void glx_fbconfig_meta(Display * xlib_display, GLXFBConfig glx_fbconfig){
   int fbconfig_id;            glXGetFBConfigAttrib(xlib_display, glx_fbconfig, GLX_FBCONFIG_ID, &fbconfig_id);
@@ -40,19 +74,17 @@ void glx_fbconfig_meta(Display * xlib_display, GLXFBConfig glx_fbconfig){
   int fbconfig_buffer_size;   glXGetFBConfigAttrib(xlib_display, glx_fbconfig, GLX_BUFFER_SIZE, &fbconfig_buffer_size);
   int fbconfig_depth_size;    glXGetFBConfigAttrib(xlib_display, glx_fbconfig, GLX_DEPTH_SIZE, &fbconfig_depth_size);
   int fbconfig_stencil_size;  glXGetFBConfigAttrib(xlib_display, glx_fbconfig, GLX_STENCIL_SIZE, &fbconfig_stencil_size);
-  
-  printf("%d %d %d %d %d %d %d %d %d %d %d %d %d %d\n", fbconfig_id, fbconfig_visual, fbconfig_doublebuffer, fbconfig_sample_buffer, fbconfig_samples,fbconfig_stereo, fbconfig_aux_buffers, fbconfig_red_size,fbconfig_gree_size, fbconfig_blue_size, fbconfig_alpha_size, fbconfig_buffer_size, fbconfig_depth_size, fbconfig_stencil_size);
 }
 
 
 int main(int argc, char** argv){
 
-  Display* xlib_display = XOpenDisplay(":0");
-  int      x11_screen_idx = DefaultScreen(xlib_display);
+  Display* xlib_display = XOpenDisplay(":0"); //cria um display genérico
+  int      x11_screen_idx = DefaultScreen(xlib_display); //retorna o indice do display atual
 
   XSetEventQueueOwner(xlib_display, XCBOwnsEventQueue);
-  xcb_connection_t * xcb_connection = XGetXCBConnection(xlib_display);
-  xcb_screen_t * xcb_scrn = xcb_get_scrn(xcb_connection, x11_screen_idx);
+  xcb_connection_t* xcb_connection = XGetXCBConnection(xlib_display);
+  xcb_screen_t* xcb_scrn = xcb_get_scrn(xcb_connection, x11_screen_idx);
 
   int glx_fbconfig_attrs[]={
     GLX_BUFFER_SIZE, 16,
@@ -77,8 +109,8 @@ int main(int argc, char** argv){
   xcb_flush(xcb_connection);
  
   int glx_context_attrs[] = {
-    GLX_CONTEXT_MAJOR_VERSION_ARB, 3,
-    GLX_CONTEXT_MINOR_VERSION_ARB, 3,
+    GLX_CONTEXT_MAJOR_VERSION_ARB, 4,
+    GLX_CONTEXT_MINOR_VERSION_ARB, 6,
     GLX_CONTEXT_FLAGS_ARB, GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
     GLX_CONTEXT_PROFILE_MASK_ARB, GLX_CONTEXT_CORE_PROFILE_BIT_ARB,
     GLX_CONTEXT_OPENGL_NO_ERROR_ARB, 1,
@@ -88,34 +120,37 @@ int main(int argc, char** argv){
   glXMakeContextCurrent(xlib_display, xcb_window, xcb_window, glx_context);
 
   //------------------------------------------------------------------------------------------
-
-  unsigned int BUFFER = 4294967295;
-  float NC=0;
-  static int flag = 1;
-  while(1){
-    //BUFFER-=1;
-    glClearColor(NC, NC, NC, 1);
-    if(flag){
-      NC += 1.0/5000.0;
-      if(NC>=1.0) flag = 0;
+  
+  XEvent ev;
+  int running = 1;
+  while(running){
+    xcb_generic_event_t* ev = xcb_ev_poll(xcb_connection, 0);
+    change_color_win();
+    if(ev != NULL){
+      switch(ev->response_type & 0b01111111){
+        case XCB_KEY_PRESS:{
+          xcb_key_press_event_t* key_press = (xcb_key_press_event_t*)ev;
+          xcb_keycode_t key_code = key_press->detail;
+          //printf("%d\n",key_code);
+          switch(key_code){
+            case 67: running = 0; break; //F1
+            default: printf("default\n"); break;
+          }
+        }break;
+      }
+    free(ev);
     }
-    else{
-      NC -= 1.0/5000.0;
-      if(NC<=0.0) flag= 1;
-    }
-    glClear(GL_COLOR_BUFFER_BIT);
-    glFlush();
   }
   
+
   //------------------------------------------------------------------------------------------
   xcb_destroy_window(xcb_connection, xcb_window);
   xcb_free_colormap(xcb_connection, xcb_colormap);
-  //glXDestroyWindow(xlib_display, glx_window);
   glXDestroyContext(xlib_display, glx_context);
   XCloseDisplay(xlib_display);
   return 0;
 }
 
 
-// clang -o exe opgl_context.c -lx11 -lx11-xcb -lxcb -lgl
-// gcc -o exe opgl_context.c -lx11 -lx11-xcb -lxcb -lgl
+// clang -o Context_exe opgl_context.c -lX11 -lX11-xcb -lxcb -lGL
+// gcc -o Context_exe opgl_context.c -lX11 -lX11-xcb -lxcb -lGL
