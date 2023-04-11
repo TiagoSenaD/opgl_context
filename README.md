@@ -11,7 +11,7 @@ TODO:
 - [] Documentar o código  
 - [] Comentar o código  
 
-Referencias:
+Referencias:  
 [Open an OpenGL Context on Linux (NO LIBRARIES) | C/Xlib/XCB/GLX](https://www.youtube.com/watch?v=bpWDDgaPkQI&t)  
 [Game Engine do zero #4 - Contexto OpenGL](https://www.youtube.com/watch?v=vnYw1Uq9NAc&t)  
 [Game Engine do zero #5 - Concluindo Contexto OpenGL](https://www.youtube.com/watch?v=Z991ILgqaK8)  
