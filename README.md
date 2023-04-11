@@ -5,20 +5,14 @@ Pasta criada para o teinamento e testes da criação de um contexto opengl, por 
 
 
 TODO:
-Modularizar o código
-  -> Criar um MAKEFILE depois da modularização
-
-Compatibilidade com o windows
-
-Documentar o código
-
-Comentar o código
-
-
-
+-[] Modularizar o código
+-[] Criar um MAKEFILE 
+-[] Compatibilidade com o windows
+-[] Documentar o código
+-[] Comentar o código
 
 Referencias:
-https://www.youtube.com/watch?v=bpWDDgaPkQI&t\
-https://www.youtube.com/watch?v=vnYw1Uq9NAc&t\
-https://www.youtube.com/watch?v=Z991ILgqaK8\
-https://registry.khronos.org/OpenGL/extensions/ARB/\
+[Open an OpenGL Context on Linux (NO LIBRARIES) | C/Xlib/XCB/GLX]https://www.youtube.com/watch?v=bpWDDgaPkQI&t
+[Game Engine do zero #4 - Contexto OpenGL]https://www.youtube.com/watch?v=vnYw1Uq9NAc&t
+[Game Engine do zero #5 - Concluindo Contexto OpenGL]https://www.youtube.com/watch?v=Z991ILgqaK8
+[OpenGL Extensions ARB]https://registry.khronos.org/OpenGL/extensions/ARB/
