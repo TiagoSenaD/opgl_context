@@ -5,11 +5,11 @@ Pasta criada para o teinamento e testes da criação de um contexto opengl, por 
 
 
 TODO:
-- [] Modularizar o código  
-- [] Criar um MAKEFILE  
-- [] Compatibilidade com o windows  
-- [] Documentar o código  
-- [] Comentar o código  
+- [ ]Modularizar o código  
+- [x]Criar um MAKEFILE  
+- [ ]Compatibilidade com o windows  
+- [ ]Documentar o código  
+- [ ]Comentar o código  
 
 Referencias:  
 [Open an OpenGL Context on Linux (NO LIBRARIES) | C/Xlib/XCB/GLX](https://www.youtube.com/watch?v=bpWDDgaPkQI&t)  
