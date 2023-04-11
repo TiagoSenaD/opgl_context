@@ -37,7 +37,7 @@ void infos(){
   printf("==========INFOS==========\n");
   glGetIntegerv(GL_MAJOR_VERSION, &Ver[0]);
   glGetIntegerv(GL_MINOR_VERSION, &Ver[1]);
-  printf("Version: %d.%d\n", Ver[0], Ver[1]);
+  printf("Version: %d.%d\nSair: F1\n", Ver[0], Ver[1]);
 }//print the Opengl version
 
 void change_color_win(){
@@ -45,11 +45,11 @@ void change_color_win(){
   static float NC = 0;
   glClearColor(NC, NC, NC, 1);
   if(flag){
-    NC += 1.0/5000.0;
+    NC += 1.0/500.0;
     if(NC>=1.0) flag = 0;
   }
   else{
-    NC -= 1.0/5000.0;
+    NC -= 1.0/500.0;
     if(NC<=0.0) flag= 1;
   }
   glClear(GL_COLOR_BUFFER_BIT);
@@ -118,11 +118,10 @@ int main(int argc, char** argv){
   };
   GLXContext glx_context = glXCreateContextAttribsARB(xlib_display, glx_fbconfig, NULL, 1, glx_context_attrs);
   glXMakeContextCurrent(xlib_display, xcb_window, xcb_window, glx_context);
-
-  //------------------------------------------------------------------------------------------
-  
+  //------------------------------------------MAIN-----------------------------------------------
   XEvent ev;
   int running = 1;
+  infos();
   while(running){
     xcb_generic_event_t* ev = xcb_ev_poll(xcb_connection, 0);
     change_color_win();
@@ -141,16 +140,10 @@ int main(int argc, char** argv){
     free(ev);
     }
   }
-  
-
-  //------------------------------------------------------------------------------------------
+  //---------------------------------------------------------------------------------------------
   xcb_destroy_window(xcb_connection, xcb_window);
   xcb_free_colormap(xcb_connection, xcb_colormap);
   glXDestroyContext(xlib_display, glx_context);
   XCloseDisplay(xlib_display);
   return 0;
 }
-
-
-// clang -o Context_exe opgl_context.c -lX11 -lX11-xcb -lxcb -lGL
-// gcc -o Context_exe opgl_context.c -lX11 -lX11-xcb -lxcb -lGL
