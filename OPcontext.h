@@ -27,11 +27,9 @@ typedef struct{
 
 } BGLC_Window;
 
-void init_BGLC_teste(BGLC_Window** win);
+void init_BGLC(BGLC_Window** win);
 
-void init_BGLC(Display** dpy,xcb_connection_t** xcb_connection);
-
-void close_BGLC(Display** dpy,xcb_connection_t** xcb_connection);
+void close_BGLC(BGLC_Window** win);
 
 void glx_fbconfig_meta(Display * xlib_display, GLXFBConfig glx_fbconfig);
 

@@ -19,20 +19,13 @@ void change_color_win(){
 
 int main(int argc, char ** argv)
 {
-    /*Display* dpy = XOpenDisplay(NULL);
-    xcb_connection_t* xcb_connection = XGetXCBConnection(dpy);
-    init_BGLC(&dpy, &xcb_connection);*/
-
     BGLC_Window * dpy;
-    init_BGLC_teste(&dpy);
-
-
-
+    init_BGLC(&dpy);
 
     XEvent ev;
     int running = 1;
     while(running){
-      xcb_generic_event_t* ev = xcb_ev_poll(xcb_connection, 0);
+      xcb_generic_event_t* ev = xcb_ev_poll(dpy->xcb_connection, 0);
       change_color_win();
       if(ev != NULL){
         switch(ev->response_type & 0b01111111){
@@ -49,6 +42,6 @@ int main(int argc, char ** argv)
       free(ev);
       }
     }
-    //close_BGLC(&dpy, &xcb_connection);
+    close_BGLC(&dpy);
 	return 0;
 }
