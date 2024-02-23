@@ -1,4 +1,4 @@
-CC = clang
+CC = gcc
 LIBS = -lX11 -lX11-xcb -lxcb -lGL
 OPT = -O2
 FLAGS = -c -W -Wall -ansi -pedantic
