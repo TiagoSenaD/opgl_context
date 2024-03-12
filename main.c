@@ -13,38 +13,23 @@ int main() {
     glContext = initOpenGL(display, visualInfo, window);
     if (!glContext) return 1;
 
+
+    XEvent ev;
     while (1) {
-        XEvent event;
-        XNextEvent(display, &event);
-        if (event.type == Expose) {
-            glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT);
-            glXSwapBuffers(display, window);
-        }
-        if (event.type == KeyPress) {
-            break;
+        changeColor();
+        glXSwapBuffers(display, window);
+        if (XPending(display)) {
+            XNextEvent(display, &ev);
+            if (ev.type == KeyPress | ev.type == ButtonPress | ev.type == ButtonRelease | ev.type == MotionNotify) {
+                printf("KeyPress: keycode %u\n",(unsigned)ev.xkey.keycode);
+
+                if (ev.xkey.keycode == 9) break;
+                }
         }
     }
 
     destroyOpenGL(display, glContext);
     destroyX11(display, window);
-
     return 0;
 }
 
-
-/*Void change_color_win(){
-  static int flag = 1;
-  static float NC = 0;
-  glClearColor(NC, NC, NC, 1);
-  if(flag){
-    NC += 1.0/500.0;
-    if(NC>=1.0) flag = 0;
-  }
-  else{
-    NC -= 1.0/500.0;
-    if(NC<=0.0) flag= 1;
-  }
-  glClear(GL_COLOR_BUFFER_BIT);
-  glFlush();
-}change the screen color between white and balck*/
