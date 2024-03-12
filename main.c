@@ -1,7 +1,39 @@
+#include <stdio.h>
 #include"OPcontext.h"
 
+int main() {
+    Display *display;
+    Window root, window;
+    XVisualInfo *visualInfo;
+    GLXContext glContext;
 
-void change_color_win(){
+    display = initX11(&display, &root, &visualInfo, &window);
+    if (!display) return 1;
+
+    glContext = initOpenGL(display, visualInfo, window);
+    if (!glContext) return 1;
+
+    while (1) {
+        XEvent event;
+        XNextEvent(display, &event);
+        if (event.type == Expose) {
+            glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT);
+            glXSwapBuffers(display, window);
+        }
+        if (event.type == KeyPress) {
+            break;
+        }
+    }
+
+    destroyOpenGL(display, glContext);
+    destroyX11(display, window);
+
+    return 0;
+}
+
+
+/*Void change_color_win(){
   static int flag = 1;
   static float NC = 0;
   glClearColor(NC, NC, NC, 1);
@@ -15,33 +47,4 @@ void change_color_win(){
   }
   glClear(GL_COLOR_BUFFER_BIT);
   glFlush();
-}//change the screen color between white and balck
-
-int main(int argc, char ** argv)
-{
-    BGLC_Window * dpy;
-    init_BGLC(&dpy);
-
-    XEvent ev;
-    int running = 1;
-    while(running){
-      xcb_generic_event_t* ev = xcb_ev_poll(dpy->xcb_connection, 0);
-      change_color_win();
-      if(ev != NULL){
-        switch(ev->response_type & 0b01111111){
-          case XCB_KEY_PRESS:{
-            xcb_key_press_event_t* key_press = (xcb_key_press_event_t*)ev;
-            xcb_keycode_t key_code = key_press->detail;
-            //printf("%d\n",key_code);
-            switch(key_code){
-              case 67: running = 0; break; //F1
-              default: printf("default\n"); break;
-            }
-          }break;
-        }
-      free(ev);
-      }
-    }
-    close_BGLC(&dpy);
-	return 0;
-}
+}change the screen color between white and balck*/
