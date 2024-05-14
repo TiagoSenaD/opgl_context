@@ -2,24 +2,16 @@
 #include"OPcontext.h"
 
 int main() {
-    Display *display;
-    Window root, window;
-    XVisualInfo *visualInfo;
-    GLXContext glContext;
 
-    display = initX11(&display, &root, &visualInfo, &window);
-    if (!display) return 1;
-
-    glContext = initOpenGL(display, visualInfo, window);
-    if (!glContext) return 1;
-
+    OpenGLContext win = initSrc();
+    if (!win.display) return 1;
 
     XEvent ev;
     while (1) {
         changeColor();
-        glXSwapBuffers(display, window);
-        if (XPending(display)) {
-            XNextEvent(display, &ev);
+        glXSwapBuffers(win.display, win.window);
+        if (XPending(win.display)) {
+            XNextEvent(win.display, &ev);
             if (ev.type == KeyPress | ev.type == ButtonPress | ev.type == ButtonRelease | ev.type == MotionNotify) {
                 printf("KeyPress: keycode %u\n",(unsigned)ev.xkey.keycode);
 
@@ -28,8 +20,7 @@ int main() {
         }
     }
 
-    destroyOpenGL(display, glContext);
-    destroyX11(display, window);
+    endSrc(win);
     return 0;
 }
 

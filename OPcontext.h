@@ -8,16 +8,14 @@
 typedef struct {
     Display *display;
     Window root;
-    Window window;
     XVisualInfo *visualInfo;
+    Window window;
     GLXContext glContext;
-    XEvent event;
+    //XEvent event;
 } OpenGLContext;
 
-Display* initX11(Display **display, Window *root, XVisualInfo **visualInfo, Window *window);
-GLXContext initOpenGL(Display *display, XVisualInfo *visualInfo, Window window);
-void destroyX11(Display *display, Window window);
-void destroyOpenGL(Display *display, GLXContext glContext);
+OpenGLContext initSrc();
+void endSrc(OpenGLContext win);
 void changeColor();
 
 #endif

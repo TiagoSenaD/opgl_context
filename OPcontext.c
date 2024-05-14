@@ -1,56 +1,58 @@
 #include"OPcontext.h"
 #include <stdio.h>
 
-Display* initX11(Display **display, Window *root, XVisualInfo **visualInfo, Window *window) {
-    *display = XOpenDisplay(NULL);
-    if (!(*display)) {
+OpenGLContext initSrc() {
+    OpenGLContext src;
+    src.display = XOpenDisplay(NULL);
+    if (!src.display) {
         fprintf(stderr, "Erro ao abrir o display X11\n");
-        return NULL;
+        src.root = 0;
+        src.visualInfo = NULL;
+        src.window = 0;
+        src.glContext = NULL;
+        return src;
     }
 
-    *root = DefaultRootWindow(*display);
+    src.root = DefaultRootWindow(src.display);
 
     GLint glAttribs[] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None };
-    *visualInfo = glXChooseVisual(*display, 0, glAttribs);
-    if (!(*visualInfo)) {
+    src.visualInfo = glXChooseVisual(src.display, 0, glAttribs);
+    if (!src.visualInfo) {
         fprintf(stderr, "Erro ao escolher o visual X11\n");
-        return NULL;
+        XCloseDisplay(src.display);
+        src.display=NULL;
+        return src;
     }
 
     XSetWindowAttributes windowAttributes;
-    windowAttributes.colormap = XCreateColormap(*display, *root, (*visualInfo)->visual, AllocNone);
+    windowAttributes.colormap = XCreateColormap(src.display, src.root, src.visualInfo->visual, AllocNone);
     windowAttributes.event_mask = ExposureMask | KeyPressMask;
-    *window = XCreateWindow(*display, *root, 0, 0, 800, 600, 0,
-        (*visualInfo)->depth, InputOutput, (*visualInfo)->visual, CWColormap | CWEventMask, &windowAttributes);
+    src.window = XCreateWindow(src.display, src.root, 0, 0, 800, 600, 0,
+        src.visualInfo->depth, InputOutput, src.visualInfo->visual, CWColormap | CWEventMask, &windowAttributes);
 
-    XSelectInput(*display, *window, ExposureMask | KeyPressMask | ButtonPressMask | ButtonReleaseMask | PointerMotionMask);
+    XSelectInput(src.display, src.window, ExposureMask | KeyPressMask | ButtonPressMask | ButtonReleaseMask | PointerMotionMask);
 
-    XMapWindow(*display, *window);
+    XMapWindow (src.display, src.window);
 
-    return *display;
-}
-
-GLXContext initOpenGL(Display *display, XVisualInfo *visualInfo, Window window) {
-    GLXContext glContext = glXCreateContext(display, visualInfo, NULL, GL_TRUE);
-    if (!glContext) {
+    src.glContext = glXCreateContext(src.display, src.visualInfo, NULL, GL_TRUE);
+    if (!src.glContext) {
         fprintf(stderr, "Erro ao criar o contexto OpenGL\n");
-        return NULL;
+        XDestroyWindow(src.display, src.window);
+        XCloseDisplay(src.display);
+        src.display=NULL;
+        return src;
     }
 
+    glXMakeCurrent(src.display, src.window, src.glContext);
 
-    glXMakeCurrent(display, window, glContext);
-
-    return glContext;
+    return src;
 }
 
-void destroyX11(Display *display, Window window) {
-    XDestroyWindow(display, window);
-    XCloseDisplay(display);
-}
-
-void destroyOpenGL(Display *display, GLXContext glContext) {
-    glXMakeCurrent(display, None, NULL);
-    glXDestroyContext(display, glContext);
+void endSrc(OpenGLContext win) {
+    glXMakeCurrent(win.display, None, NULL);
+    glXDestroyContext(win.display, win.glContext);
+    XDestroyWindow(win.display, win.window);
+    XCloseDisplay(win.display);
 }
 
 void changeColor(){
